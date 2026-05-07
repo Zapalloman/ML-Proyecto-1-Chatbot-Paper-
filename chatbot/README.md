@@ -40,7 +40,6 @@ make setup
 # 2. Pull candidate LLMs
 ollama pull gemma3:4b
 ollama pull qwen2.5:3b
-ollama pull gemma3:1b
 
 # 3. Ingest the National Pokédex from PokéAPI (~30-60 minutes; idempotent + resumable)
 make ingest

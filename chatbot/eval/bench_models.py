@@ -6,11 +6,11 @@ report to `eval/model_selection.md`.
 
 Requires:
   - Ollama running on localhost:11434
-  - Models pulled: gemma3:4b, qwen2.5:3b, gemma3:1b
+  - Models pulled: gemma3:4b, qwen2.5:3b
   - GPU driver functional (re-run after reboot if NVML mismatch)
 
 Usage:
-  python -m eval.bench_models                   # all 3 candidates
+  python -m eval.bench_models                   # all candidates
   python -m eval.bench_models --models gemma3:4b qwen2.5:3b
 """
 
@@ -28,7 +28,7 @@ from typing import Iterator
 import requests
 
 OLLAMA_URL = "http://localhost:11434"
-DEFAULT_MODELS = ["gemma3:4b", "qwen2.5:3b", "gemma3:1b"]
+DEFAULT_MODELS = ["gemma3:4b", "qwen2.5:3b"]
 
 PROMPTS: list[tuple[str, str, str]] = [
     (

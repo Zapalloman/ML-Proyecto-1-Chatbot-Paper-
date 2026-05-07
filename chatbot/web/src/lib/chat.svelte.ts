@@ -8,7 +8,7 @@
 
 import { browser } from '$app/environment';
 
-export const MODELS = ['gemma3:4b', 'qwen2.5:3b', 'gemma3:1b'] as const;
+export const MODELS = ['gemma3:4b', 'qwen2.5:3b'] as const;
 export type Model = (typeof MODELS)[number];
 export const DEFAULT_MODEL: Model = 'gemma3:4b';
 

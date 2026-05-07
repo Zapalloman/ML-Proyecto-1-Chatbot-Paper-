@@ -13,7 +13,7 @@ The runtime prompt assembly lives in `chatbot/server/prompts.py`.
 ## What "prompt engineering" means in this project
 
 The chatbot does **no fine-tuning**. The LLM (one of `gemma3:4b`,
-`qwen2.5:3b`, `gemma3:1b`) is generic. The mechanism that makes it behave as
+`qwen2.5:3b`) is generic. The mechanism that makes it behave as
 a Pokédex expert is the **prompt we send on every turn**:
 
 ```
@@ -46,7 +46,7 @@ The seven rules are identical in English and Spanish:
 |---|---|---|
 | 1 | Answer ONLY with facts in the CONTEXT block | Model invents stats/types from training data |
 | 2 | If not in CONTEXT, say literal "No tengo esa información en mi Pokédex" / "I don't have that in my Pokédex." | Soft hallucination ("I think Pikachu is…") |
-| 3 | Reply in the user's input language; do not switch mid-message | Spanish question → English reply (bug observed with `gemma3:1b` zero-shot) |
+| 3 | Reply in the user's input language; do not switch mid-message | Spanish question → English reply (zero-shot drift on smaller models) |
 | 4 | Refuse one-line if not about Pokémon | Out-of-domain leakage ("capital of France?") |
 | 5 | Use **bold** for Pokémon / move / ability names | Improves UI readability via the chat client's markdown renderer |
 | 6 | ≤ 6 sentences unless asked for more | `gemma3:4b` was producing 600-token rambles on `qwen2.5:3b`-length queries |
@@ -82,7 +82,7 @@ Decisions:
 - **Pokédex number in the heading** — the model picks it up for rule #7
   citation without explicit prompting.
 - **No truncation** — average doc is ~250 tokens; top-5 = ~1.3K tokens of
-  context. Fits comfortably in the 4 K context window even on `gemma3:1b`.
+  context. Fits comfortably in the 4 K context window of the smaller candidate.
 
 Empty-retrieval guard: if the retriever returns 0 docs (legitimate when the
 query is out-of-domain), the CONTEXT block contains a single sentinel line
@@ -137,7 +137,7 @@ separate `role: system`):
 
 History truncation to the last 8 messages bounds the prompt at ~3 K tokens
 in the worst case (large CONTEXT + 8 chatty turns) — well under the 4 K
-context all 3 models support.
+context the candidate models support.
 
 ---
 
@@ -146,11 +146,11 @@ context all 3 models support.
 | Version | Change | Reason |
 |---|---|---|
 | v0 | English-only system prompt, no language rule | All Phase 2 tests pass in English, all Spanish tests answer in English |
-| v1 | Added rule #3 (mirror user's language), kept English system | Spanish answers improved but `gemma3:1b` still drifts mid-message |
+| v1 | Added rule #3 (mirror user's language), kept English system | Spanish answers improved but smaller models still drifted mid-message |
 | v2 | Bilingual system prompt (rules duplicated in EN + ES) | Spanish compliance jumps to 100 % across smoke tests |
 | v3 | Added rule #7 (cite #0025) | Eval transcripts now self-document which doc grounded the answer |
 | v4 | Added empty-retrieval sentinel in CONTEXT | Eliminates the "Tell me about Pokémon #2000" hallucination |
-| v5 | Header line in user's language | Reinforces #3; observed one fewer mid-message language flip on `gemma3:1b` |
+| v5 | Header line in user's language | Reinforces #3; observed one fewer mid-message language flip on smaller candidates |
 | v6 (current) | History truncation to last 8 messages | Caps prompt size; no quality loss vs. full history in tests |
 
 ---
@@ -161,7 +161,6 @@ End-to-end smoke run from `curl localhost:5173/api/chat` against each model:
 
 | Query | Model | Behavior |
 |---|---|---|
-| "What types is Pikachu? Be brief." | `gemma3:1b` | Streamed bullet list, type "Electric" correct (mixed with genus "Mouse Pokémon" — minor). |
 | "¿Qué tipo es Pikachu? Responde breve." | `qwen2.5:3b` | "Electric (#0025)" — perfect, citation per rule #7. |
 | "What is the evolution chain of Eevee? Be brief." | `gemma3:4b` | Partial: named one Eeveelution then said "I don't have that in my Pokédex" — accurate refusal because top-5 retrieval cannot fit Eevee + all 8 evolutions. |
 
@@ -173,13 +172,10 @@ not a prompt bug.
 
 ## Open issues (carried into Phase 4)
 
-1. **Genre vs. type confusion** in `gemma3:1b` ("Mouse Pokémon" listed
-   alongside "Electric"). The CONTEXT clearly separates them; the smaller
-   model conflates the two adjacent fields.
-2. **Long-chain queries** (Eevee, Tyrogue, Wurmple) overflow top-5
+1. **Long-chain queries** (Eevee, Tyrogue, Wurmple) overflow top-5
    retrieval. Either bump `k` for these specific intents or accept partial
    answers as a known limitation.
-3. **Mixed-language queries** answer in English. Acceptable for Phase 2;
+2. **Mixed-language queries** answer in English. Acceptable for Phase 2;
    may revisit if the eval surfaces it as user-confusing.
 
 These will be revisited *with empirical data* in Phase 4 when all 30

@@ -11,7 +11,6 @@
 |---|---|---|---|
 | `gemma3:4b` | 0.31 | 32.4 | 5/5 |
 | `qwen2.5:3b` | 0.19 | 76.7 | 5/5 |
-| `gemma3:1b` | 0.23 | 131.5 | 5/5 |
 
 ## Detailed results
 
@@ -115,73 +114,6 @@ _TTFT: 0.16s · 76.7 tok/s · 23 tokens · ok=True_
 Nombre: Calyx: Psychic
 Nombre: Solgaleo: Ghost
 Nombre: Lunala: Fairy
-```
-
-### `gemma3:1b`
-
-**P1** ('Pikachu evolves into Raichu using a Thunder Stone. In one sentence, what type is Raichu?')  
-_TTFT: 30.11s · 125.5 tok/s · 16 tokens · ok=True_  
-```
-Raichu is a Thunderbolt Pokémon, known for its powerful lightning abilities.
-```
-
-**P2** ('Charizard tiene dos tipos. ¿Cuáles son? Responde en español en una frase.')  
-_TTFT: 0.22s · 137.1 tok/s · 21 tokens · ok=True_  
-```
-Charizard tiene dos tipos, Firey y Dark, cada uno con sus propias características y habilidades.
-```
-
-**P3** ('Between Mewtwo and Mew, which has higher base Special Attack? State the value.')  
-_TTFT: 0.22s · 132.2 tok/s · 58 tokens · ok=True_  
-```
-Mewtwo has a significantly higher base Special Attack than Mew.
-
-*   **Mewtwo:** 1100
-*   **Mew:** 600
-
-Therefore, **Mewtwo** has a base Special Attack of 1100.
-```
-
-**P4** ('Why is Cubone said to wear a skull on its head, according to Pokédex lore?')  
-_TTFT: 0.23s · 129.1 tok/s · 521 tokens · ok=True_  
-```
-You've stumbled upon a really fascinating and somewhat debated point! The reason Cubone is said to wear a skull on its head in Pokémon lore is rooted in a specific, and quite bizarre, legend about the Pokémon’s development. Here’s the breakdown:
-
-**The Legend of the "Skull-Bearing" Cubone:**
-
-* **The Origin:** The story began with a researcher named Dr. James G. (a name often associated with Pokémon lore) who was studying a rare, overgrown Pokémon. He noticed that Cubone seemed to have a distinct, almost melancholic, expression. 
-* **The Observation:** Dr. G. observed that Cubone's head was perpetually covered in a fine, gray dust that resembled a skull. He hypothesized that this dust was somehow connected to his own experiences and memories, and that it represented a dormant, ancient sorrow.
-* **The Transformation:**  He theorized that the dust was influencing Cubone’s growth, subtly shaping it into a spectral, almost mournful form.  He believed it was a manifestation of a dark past.
-
-**What the Pokédex Says (and What's More Accurate):**
-
-* **Official Pokédex Entry (as of 2018):**  "Cubone is said to be a Pokémon that carries a dark, somewhat melancholic history. Its head is covered in a fine gray dust, believed to be a manifestation of its past." This entry *does* state that the dust *could* be linked to a tragic past, but it doesn't explicitly say it’s a skull.
-
-**Why the Confusion?**
-
-* **Visual Similarity:** The appearance of the dust is strikingly similar to a skull, and it’s this visual similarity that led to the widespread belief in the legend.
-* **The "Past" Element:** The legend heavily emphasizes the *feeling* of sadness and loss associated with Cubone.  The “skull” metaphor is a way to represent this emotional weight.
-
-**Important Note:** This is a *legendary* story.  Pokémon lore has evolved, and the significance of the skull on Cubone's head has largely been dropped in later generations. It remains a charming, quirky detail that adds to the Pokémon's mystique.
-
-**In short, the “skull” on Cubone is a visual metaphor for a deep, perhaps melancholic, past, rather than a literal representation of a skull.**
-
-Do you have any other questions about Pokémon lore or the story behind Cubone?
-```
-
-**P5** ("Reply in Spanish: list three Eeveelutions and their types as 'Name: Type'.")  
-_TTFT: 0.23s · 131.5 tok/s · 53 tokens · ok=True_  
-```
-¡Claro! Aquí tienes tres Eeveelutions con sus tipos:
-
-*   Name: Lea
-    Type: Planta
-
-*   Name: Umbreon
-    Type: Fire
-
-*   Name: Sylveon
-    Type: Fairy
 ```
 
 ---

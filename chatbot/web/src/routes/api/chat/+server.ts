@@ -6,7 +6,7 @@
  * Request body:
  *   {
  *     messages: [{ role: 'user' | 'assistant' | 'system', content: string }, ...],
- *     model?:   'gemma3:4b' | 'qwen2.5:3b' | 'gemma3:1b',
+ *     model?:   'gemma3:4b' | 'qwen2.5:3b',
  *     k?:       number  // top-k retrieval, default 5
  *   }
  *
@@ -29,7 +29,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 
-const ALLOWED_MODELS = ['gemma3:4b', 'qwen2.5:3b', 'gemma3:1b'] as const;
+const ALLOWED_MODELS = ['gemma3:4b', 'qwen2.5:3b'] as const;
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
 const DEFAULT_MODEL: AllowedModel = 'gemma3:4b';
 
