@@ -1,0 +1,78 @@
+\section{Methodology}
+
+\subsection{Dataset Description}
+
+The dataset comprises 14,561 inpatient stay records from Hospital El Pino, a public hospital located in the southern metropolitan area of Santiago, Chile. Each record represents a single hospital stay and contains the following structured fields:
+
+\begin{itemize}
+    \item \textbf{Diagnoses}: 35 columns (1 principal + 34 secondary), each containing an ICD-10 (CIE-10) code with its Spanish-language description in the format \texttt{CODE - Description}. Unused slots are marked with a sentinel value ``\texttt{-}''.
+    \item \textbf{Procedures}: 30 columns (1 principal + 29 secondary), each containing an ICD-9-PCS (CIE-9) procedure code with description, following the same format. Unused slots are similarly marked.
+    \item \textbf{Patient age}: Numeric variable (age in years at time of admission), ranging from 0 to 121 years.
+    \item \textbf{Patient sex}: Categorical variable (\textit{Hombre}/\textit{Mujer}; Male/Female).
+    \item \textbf{DRG (target)}: The assigned DRG class from the IR-GRD v3.1 grouper with FONASA 2016 pricing, in the format \texttt{CODE - Description}.
+\end{itemize}
+
+Table~\ref{tab:dataset_overview} summarizes the key characteristics. The dataset contains 526 distinct DRG classes, 3,648 unique ICD-10 diagnosis codes, and 903 unique ICD-9-PCS procedure codes, reflecting considerable clinical diversity. The presence of ICD-10 code U07.1 (COVID-19) in the data indicates coverage of the pandemic period. The data is de-identified and provided for academic use.
+
+\input{../tables/tbl_dataset_overview}
+
+\subsection{Preprocessing}
+
+\subsubsection{Input Representation}
+Since the diagnoses and procedures are explicitly unordered---the column position carries no clinical meaning---we will employ a \textbf{multi-hot (bag-of-codes)} encoding. Each record will be represented as a binary vector where each dimension corresponds to a code in the observed vocabulary: a 1 indicates the code is present in that stay, and a 0 indicates absence. Separate multi-hot vectors will be constructed for diagnosis codes and procedure codes, then concatenated with the numeric age and binary sex features.
+
+This representation is preferred over padded-sequence encodings because (a)~it respects the unordered nature of the inputs, (b)~it is directly consumable by linear models and tree-based ensembles, and (c)~it avoids introducing spurious positional information that could mislead sequence-aware models.
+
+\subsubsection{Sentinel Value Handling}
+The sentinel value ``\texttt{-}'' is interpreted as ``slot not used,'' rather than as a missing value. In the multi-hot encoding, these entries simply do not activate any code dimension. The number of non-sentinel entries per stay is derived as a count feature (\texttt{n\_diagnoses}, \texttt{n\_procedures}).
+
+\subsubsection{Feature Engineering}
+Beyond the multi-hot code vectors, the following features will be derived:
+\begin{itemize}
+    \item \textbf{Age}: Retained as a continuous numeric variable.
+    \item \textbf{Sex}: Encoded as a binary indicator (0/1).
+    \item \textbf{Diagnosis count}: Number of non-empty diagnosis slots per stay.
+    \item \textbf{Procedure count}: Number of non-empty procedure slots per stay.
+\end{itemize}
+
+\subsubsection{Vocabulary and Out-of-Vocabulary Policy}
+The code vocabulary will be constructed from the training split. Codes appearing in validation or test sets but absent from training will be mapped to an \texttt{<UNK>} bucket, effectively ignored in the multi-hot vector. Codes will be validated against the CIE-10 and CIE-9 master catalogs provided with the dataset.
+
+\subsection{Train/Validation/Test Split}
+
+We will employ a stratified 70/15/15 split at the stay level, stratifying on the DRG class to ensure representation of rare classes across all partitions. Stratification is critical given the heavy class imbalance: without it, rare DRGs (with fewer than 10 examples) may be entirely absent from the validation or test sets, making evaluation unreliable.
+
+\subsection{Machine Learning Techniques}
+
+We propose three candidate model families, selected to span the spectrum from interpretable baselines to flexible nonlinear models:
+
+\subsubsection{Logistic Regression (Baseline)}
+A one-vs-rest (OvR) logistic regression classifier over the multi-hot feature space provides an interpretable linear baseline. Its coefficients reveal which codes are most predictive of each DRG, aiding clinical validation. Class weights will be set inversely proportional to class frequency to address imbalance. This baseline establishes the performance floor against which more complex models are measured.
+
+\subsubsection{Gradient-Boosted Trees}
+XGBoost or LightGBM with multi-class softmax loss represents the strong tabular-data baseline. Gradient-boosted trees handle sparse high-dimensional multi-hot inputs natively, tolerate class imbalance via the \texttt{scale\_pos\_weight} or \texttt{class\_weight} parameters, and require minimal feature engineering beyond the multi-hot encoding. Their ensemble structure captures nonlinear interactions between codes that logistic regression cannot model.
+
+\subsubsection{Shallow Neural Network}
+A feedforward neural network with 1--2 hidden layers (128--256 units, ReLU activation, dropout regularization) over the concatenated multi-hot input provides a feature-learning comparison. The network can discover dense representations of code patterns without requiring pre-trained embeddings. Class-weighted cross-entropy loss will be used for training.
+
+We note that transformer-based clinical encoders (Med-BERT, BEHRT) are designed for longitudinal multi-visit sequences and are architecturally mismatched to our single-stay, unordered-set formulation. They are not included as candidates but are cited for context in Section~II.
+
+\subsection{Evaluation Metrics}
+
+Given the multi-class imbalanced nature of the DRG prediction task, we will evaluate models using the following metrics, each justified by a specific property of the problem:
+
+\begin{itemize}
+    \item \textbf{Top-1 Accuracy (Micro)}: The fraction of stays with correctly predicted DRG. This is the headline metric but is dominated by frequent classes and must not be reported alone.
+
+    \item \textbf{Macro-Averaged F1}: Weights every DRG class equally. A model that excels on common DRGs but fails on rare ones will score well on accuracy but poorly on macro-F1, making this metric essential for evaluating rare-class performance.
+
+    \item \textbf{Top-$k$ Accuracy ($k \in \{3, 5\}$)}: Measures whether the true DRG appears among the model's top-$k$ predictions. Operationally relevant because DRG assignment is often reviewed by a coder who can select from a shortlist.
+
+    \item \textbf{Balanced Accuracy}: The macro-average of per-class recall. Directly interpretable as ``average recall across DRGs'' and a lighter-weight complement to macro-F1.
+
+    \item \textbf{Per-Class Recall for Top-$N$ DRGs}: A per-class breakdown for the most frequent DRG classes, surfacing systematic confusions (e.g., between severity variants of the same base DRG) that aggregate metrics hide.
+
+    \item \textbf{Matthews Correlation Coefficient (MCC)}: A single imbalance-aware scalar that accounts for all four confusion-matrix cells in the multi-class extension. Robust to extreme class skew.
+\end{itemize}
+
+We explicitly exclude ROC-AUC and PR-AUC, which are natural for binary tasks but awkward to interpret for single-label multi-class classification with hundreds of classes. SMOTE-style resampling is also excluded because interpolation in high-dimensional binary multi-hot space produces invalid code combinations; we rely instead on class-weighted losses and stratified sampling for imbalance mitigation.

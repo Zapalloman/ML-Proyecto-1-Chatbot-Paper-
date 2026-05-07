@@ -1,0 +1,23 @@
+\section{Related Work}
+
+The application of machine learning to DRG and clinical classification tasks has evolved across several related research streams.
+
+\subsection{DRG Prediction from Structured Codes}
+
+Early work by Fetter et al.\ established the DRG framework as a hierarchical classification of hospital stays based on principal diagnosis, procedures, age, and comorbidities \cite{fetter1980drg}. Subsequent studies explored statistical and ML approaches to automate or validate DRG assignment. Gartner et al.\ \cite{gartner2015ml} applied ensemble methods to predict DRGs from structured clinical codes, demonstrating that gradient-boosted trees outperformed rule-based groupers on incomplete coding data. More recently, Rajkomar et al.\ \cite{rajkomar2018scalable} showed that deep learning models could predict billing codes, including DRG-related outcomes, from electronic health records at scale, achieving strong performance on primary diagnosis and procedure prediction tasks.
+
+\subsection{ICD Code Classification and Prediction}
+
+A parallel stream of work addresses ICD code assignment from clinical free text, which is related but distinct from the DRG prediction task addressed here. Mullenbach et al.\ \cite{mullenbach2018caml} proposed Convolutional Attention for Multi-Label classification (CAML) to assign ICD codes from discharge summaries, establishing attention-based models as the state of the art for text-to-ICD prediction. Subsequent work by Vu et al.\ \cite{vu2020label} introduced label-aware attention mechanisms that further improved multi-label ICD classification on the MIMIC-III dataset \cite{johnson2016mimic}.
+
+While these text-based approaches are not directly applicable to our structured-code input setting, they inform the broader landscape of clinical classification and demonstrate the feasibility of data-driven approaches to replace or augment rule-based clinical coding systems.
+
+\subsection{Clinical Code Representations}
+
+The representation of clinical codes as input features is a key methodological choice. Traditional approaches use multi-hot (bag-of-codes) encoding, where each code in the vocabulary is represented as a binary indicator. More sophisticated approaches learn dense embeddings of clinical codes from their co-occurrence patterns. Choi et al.\ \cite{choi2016med2vec} proposed Med2Vec to learn vector representations of medical codes from sequential clinical data, while Beam et al.\ \cite{beam2019clinical} demonstrated that clinical concept embeddings capture meaningful medical relationships.
+
+Transformer-based models such as BEHRT \cite{li2020behrt} and Med-BERT \cite{rasmy2021medbert} extended the pre-training paradigm to clinical code sequences, learning contextualized representations from large-scale EHR data. However, these models typically require longitudinal patient trajectories across multiple visits, whereas our task considers a single inpatient stay with unordered code sets---a simpler but distinct problem formulation that favors bag-of-codes representations.
+
+\subsection{Class Imbalance in Clinical Classification}
+
+DRG classification is inherently imbalanced: a small number of DRGs account for the majority of hospital stays, while a long tail of rare DRGs may have very few examples. This mirrors the broader challenge of class imbalance in clinical ML, addressed through stratified sampling, class-weighted losses, and evaluation with macro-averaged metrics \cite{haixiang2017imbalanced, johnson2019survey}. Notably, interpolation-based oversampling methods such as SMOTE \cite{chawla2002smote} are ill-suited for high-dimensional binary feature spaces (such as multi-hot ICD codes), as interpolated samples do not correspond to valid code combinations.

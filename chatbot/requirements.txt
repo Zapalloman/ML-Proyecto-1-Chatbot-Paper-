@@ -1,0 +1,8 @@
+requests>=2.32,<3
+tqdm>=4.66
+python-dotenv>=1.0
+sentence-transformers>=3.0,<4
+sqlite-vec>=0.1.6
+fastapi>=0.115,<1
+uvicorn[standard]>=0.32
+pydantic>=2.8,<3

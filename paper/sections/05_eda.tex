@@ -1,0 +1,88 @@
+\section{Exploratory Data Analysis}
+
+\subsection{Data Quality}
+
+The Hospital El Pino dataset exhibits high completeness for the core variables: age, sex, and DRG target are present for all 14,561 records (100\% completeness). The 35 diagnosis and 30 procedure columns use the sentinel value ``\texttt{-}'' to indicate unused slots, which is a structural feature of the fixed-width column layout rather than true data missingness.
+
+\input{../tables/tbl_missingness}
+
+As shown in Table~\ref{tab:missingness}, 68.6\% of the 946,465 total code cells (65 columns $\times$ 14,561 records) contain the sentinel value, reflecting the fact that most stays have far fewer diagnoses and procedures than the maximum slot capacity. Fig.~\ref{fig:completeness} visualizes the completeness by column position: the principal diagnosis (slot~1) is populated for 100\% of records, with completeness declining steeply for secondary slots. A similar pattern holds for procedure columns, where the principal procedure is present in the majority of records but higher-numbered slots are increasingly sparse.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{fig_completeness.pdf}
+    \caption{Completeness rates by column slot position for diagnosis (left) and procedure (right) columns. Slot~1 (principal) is fully populated; secondary slots decline sharply.}
+    \label{fig:completeness}
+\end{figure}
+
+An age value of 121 years was observed, which may represent a data-entry error or a coded value for undetermined age. Further validation against hospital records would be needed to confirm; for the purposes of this study, the value is retained as-is.
+
+\subsection{Descriptive Statistics}
+
+\input{../tables/tbl_age_summary}
+
+Table~\ref{tab:age_summary} presents the age distribution by sex. The overall mean age is 39.4 years (SD = 24.7), with a median of 36 years. The dataset is 66.0\% female and 34.0\% male, reflecting the dominance of obstetric DRGs (cesarean sections and vaginal deliveries) in the case mix. Female patients have a lower mean age (35.6 years) compared to male patients (47.0 years), consistent with the inclusion of a substantial population of childbearing-age women.
+
+On average, each stay has 7.2 diagnoses (median 6, max 35) and 13.2 procedures (median 11, max 30), indicating that the typical clinical record carries a moderate coding density with high variability.
+
+\subsection{Visualizations}
+
+\subsubsection{DRG Class Distribution}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{fig_drg_top20.pdf}
+    \caption{Top-20 DRGs by frequency. Obstetric categories (cesarean section, vaginal delivery) dominate the case mix.}
+    \label{fig:drg_top20}
+\end{figure}
+
+Fig.~\ref{fig:drg_top20} shows the top-20 DRGs by frequency. The distribution is heavily skewed: the top DRG (cesarean section) accounts for 5.6\% of all records, and the top-5 DRGs collectively cover 18.6\% of the dataset. The long tail is substantial---of the 526 distinct DRG classes, many have fewer than 10 occurrences. This extreme imbalance motivates the use of macro-averaged metrics and class-weighted losses described in Section~IV-E.
+
+\input{../tables/tbl_top_drgs}
+
+\subsubsection{Age Distribution by Sex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{fig_age_hist_by_sex.pdf}
+    \caption{Age distribution by sex. The female distribution shows a pronounced peak in the 20--35 age range, driven by obstetric admissions.}
+    \label{fig:age_by_sex}
+\end{figure}
+
+Fig.~\ref{fig:age_by_sex} presents overlaid histograms of age by sex. The female distribution exhibits a bimodal pattern with a pronounced peak in the 20--35 age range (corresponding to childbirth-related admissions) and a secondary peak in the elderly population. The male distribution is more uniformly spread across adult ages with a higher concentration in the 50--80 range.
+
+\subsubsection{Diagnosis and Procedure Count Distributions}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{fig_diag_count_dist.pdf}
+    \caption{Distribution of the number of diagnoses per hospital stay.}
+    \label{fig:diag_count}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{fig_proc_count_dist.pdf}
+    \caption{Distribution of the number of procedures per hospital stay.}
+    \label{fig:proc_count}
+\end{figure}
+
+Fig.~\ref{fig:diag_count} shows the diagnosis-count distribution: the majority of stays have between 3 and 12 diagnoses, with a right-skewed tail extending to the maximum of 35. Fig.~\ref{fig:proc_count} shows the analogous distribution for procedures, where the typical stay has 5--20 procedures. These distributions inform the multi-hot encoding choice: the high variability in code counts makes fixed-length representations suboptimal, while the bag-of-codes approach naturally accommodates variable-length inputs.
+
+\subsubsection{Top Principal Diagnoses and Procedures}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{fig_top_icd10_principal.pdf}
+    \caption{Top-15 principal ICD-10 diagnoses. Septicemia, heart failure, pneumonia, and obstetric conditions are the most frequent.}
+    \label{fig:top_icd10}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{fig_top_icd9_principal.pdf}
+    \caption{Top-15 principal ICD-9-PCS procedures. Cesarean sections and vaginal deliveries are the most common procedures, consistent with the DRG distribution.}
+    \label{fig:top_icd9}
+\end{figure*}
+
+Fig.~\ref{fig:top_icd10} and Fig.~\ref{fig:top_icd9} display the top-15 principal diagnoses and procedures, respectively. The principal diagnoses are led by septicemia (A41.8), congestive heart failure (I50.0), and unspecified pneumonia (J18.9)---common conditions for a general public hospital. Notably, COVID-19 (U07.1) appears among the frequent diagnoses, confirming coverage of the pandemic period. The principal procedures are dominated by obstetric interventions (cesarean sections, vaginal deliveries) and general surgical procedures (appendectomy, cholecystectomy), reflecting the hospital's role as a community facility serving both obstetric and general medical populations.

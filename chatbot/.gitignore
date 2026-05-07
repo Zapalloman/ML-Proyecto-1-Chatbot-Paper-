@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Vector DB / sqlite caches (ingest artifact - regenerable)
+data/pokedex.sqlite
+data/pokedex.sqlite-*
+data/embeddings.sqlite
+data/embeddings.sqlite-*
+data/raw_cache/
+
+# Node / SvelteKit
+web/node_modules/
+web/.svelte-kit/
+web/build/
+web/.env
+web/.env.local
+
+# Eval logs (regeneratable)
+eval/runs/

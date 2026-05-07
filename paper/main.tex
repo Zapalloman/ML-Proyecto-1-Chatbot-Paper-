@@ -1,0 +1,56 @@
+% DRG Predictor Paper — Hospital El Pino
+% IEEE Conference Format, 6-page double-column
+\documentclass[conference]{IEEEtran}
+
+% ----- Packages -----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{array}
+
+% Figure paths
+\graphicspath{{../figures/}{../}}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=blue,
+    urlcolor=blue,
+}
+
+\begin{document}
+
+% ----- Title -----
+\title{Machine Learning Approaches for DRG Prediction\\from Clinical Coding Data: A Study of\\Hospital El Pino, Chile}
+
+\author{
+    \IEEEauthorblockN{Javier Far{\'\i}as, Uriel Navarrete, Fabiola Oses, Vicente Abarca}
+    \IEEEauthorblockA{Universidad Andres Bello\\
+    Santiago, Chile}
+}
+
+\maketitle
+
+% ----- Abstract -----
+\input{sections/00_abstract}
+
+% ----- Body -----
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_objective}
+\input{sections/04_methodology}
+\input{sections/05_eda}
+
+% ----- References -----
+\bibliographystyle{IEEEtran}
+\bibliography{../references/refs}
+
+\end{document}

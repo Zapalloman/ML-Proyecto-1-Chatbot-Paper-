@@ -1,0 +1,5 @@
+\section{Objective}
+
+The objective of this study is to develop a supervised machine learning model capable of predicting the Diagnosis-Related Group (DRG) assigned to a hospital stay, based on the patient's clinical coding data. Specifically, given an unordered set of up to 35 ICD-10 diagnoses, an unordered set of up to 30 ICD-9-PCS procedures, patient age (in years), and patient sex, the model will output a single predicted DRG class from the IR-GRD v3.1 classification system.
+
+This constitutes a single-label, multi-class classification problem over approximately 526 distinct DRG classes observed in the Hospital El Pino dataset. The diagnosis and procedure inputs are treated as unordered sets---no clinical ordering is assumed among the coded entries. The study is scoped to a single hospital and does not require longitudinal patient history across multiple visits.
